@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.email(),
@@ -37,6 +37,7 @@ export const SignInView = () => {
 
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, setPending] = useState(false);
+  const router = useRouter();
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setError(undefined);
