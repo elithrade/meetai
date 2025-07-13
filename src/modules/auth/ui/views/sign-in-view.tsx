@@ -82,7 +82,7 @@ export const SignInView = () => {
                 </div>
                 {true && (
                   <Alert className="bg-destructive/10 border--none">
-                    <OctagonAlertIcon className="h4 w-4 !text-destructive" />
+                    <OctagonAlertIcon className="h-4 w-4 !text-destructive" />
                     <AlertTitle>Error</AlertTitle>
                   </Alert>
                 )}
