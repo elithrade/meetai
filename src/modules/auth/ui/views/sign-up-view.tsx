@@ -157,7 +157,7 @@ export const SignUpView = () => {
                     className="w-full"
                     disabled={pending}
                   >
-                    Github
+                    GitHub
                   </Button>
                 </div>
                 <div className="text-center text-sm">
