@@ -156,6 +156,11 @@ export const SignUpView = () => {
                     type="button"
                     className="w-full"
                     disabled={pending}
+                    onClick={() => {
+                      authClient.signIn.social({
+                        provider: "github",
+                      });
+                    }}
                   >
                     GitHub
                   </Button>
@@ -173,7 +178,11 @@ export const SignUpView = () => {
             </form>
           </Form>
           <div className="bg-gradient-to-br from-green-700 to-green-900 relative hidden md:flex flex-col gap-y-4 items-center justify-center">
-            <img src="/logo.svg" alt="Meet.AI logo" className="h-[92px] w-[92px]" />
+            <img
+              src="/logo.svg"
+              alt="Meet.AI logo"
+              className="h-[92px] w-[92px]"
+            />
             <p className="text-2xl font-semibold text-white">Meet.AI</p>
           </div>
         </CardContent>
