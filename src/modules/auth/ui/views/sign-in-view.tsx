@@ -37,7 +37,6 @@ export const SignInView = () => {
 
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, setPending] = useState(false);
-  const router = useRouter();
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setError(undefined);
@@ -48,11 +47,32 @@ export const SignInView = () => {
         {
           email: data.email,
           password: data.password,
+          callbackURL: "/",
         },
         {
-          onSuccess: () => {
-            router.push("/");
-          },
+          onSuccess: () => {},
+        },
+      );
+      if (error) {
+        setError(error.message);
+      }
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const onSocial = async (provider: "google" | "github") => {
+    setError(undefined);
+    setPending(true);
+
+    try {
+      const { error } = await authClient.signIn.social(
+        {
+          provider: provider,
+          callbackURL: "/",
+        },
+        {
+          onSuccess: () => {},
         },
       );
       if (error) {
@@ -131,6 +151,7 @@ export const SignInView = () => {
                     type="button"
                     className="w-full"
                     disabled={pending}
+                    onClick={() => onSocial("google")}
                   >
                     Google
                   </Button>
@@ -139,11 +160,7 @@ export const SignInView = () => {
                     type="button"
                     className="w-full"
                     disabled={pending}
-                    onClick={() => {
-                      authClient.signIn.social({
-                        provider: "github",
-                      });
-                    }}
+                    onClick={() => onSocial("github")}
                   >
                     Github
                   </Button>

@@ -46,7 +46,6 @@ export const SignUpView = () => {
 
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, setPending] = useState(false);
-  const router = useRouter();
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setError(undefined);
@@ -58,11 +57,34 @@ export const SignUpView = () => {
           name: data.name,
           email: data.email,
           password: data.password,
+          callbackURL: "/",
         },
         {
-          onSuccess: () => {
-            router.push("/");
-          },
+          onSuccess: () => {},
+        },
+      );
+      if (error) {
+        setError(error.message);
+      }
+    } finally {
+      setPending(false);
+    }
+  };
+
+  // TODO: Figure out a way to not replicating this code,
+  // TODO: the same code used in sign-in-view too.
+  const onSocial = async (provider: "google" | "github") => {
+    setError(undefined);
+    setPending(true);
+
+    try {
+      const { error } = await authClient.signIn.social(
+        {
+          provider: provider,
+          callbackURL: "/",
+        },
+        {
+          onSuccess: () => {},
         },
       );
       if (error) {
@@ -148,6 +170,7 @@ export const SignUpView = () => {
                     type="button"
                     className="w-full"
                     disabled={pending}
+                    onClick={() => onSocial("google")}
                   >
                     Google
                   </Button>
@@ -156,11 +179,7 @@ export const SignUpView = () => {
                     type="button"
                     className="w-full"
                     disabled={pending}
-                    onClick={() => {
-                      authClient.signIn.social({
-                        provider: "github",
-                      });
-                    }}
+                    onClick={() => onSocial("github")}
                   >
                     GitHub
                   </Button>
