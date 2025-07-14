@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { handleSocialAuth } from "./authUtils";
 
 const formSchema = z
   .object({
@@ -57,30 +57,6 @@ export const SignUpView = () => {
           name: data.name,
           email: data.email,
           password: data.password,
-          callbackURL: "/",
-        },
-        {
-          onSuccess: () => {},
-        },
-      );
-      if (error) {
-        setError(error.message);
-      }
-    } finally {
-      setPending(false);
-    }
-  };
-
-  // TODO: Figure out a way to not replicating this code,
-  // TODO: the same code used in sign-in-view too.
-  const onSocial = async (provider: "google" | "github") => {
-    setError(undefined);
-    setPending(true);
-
-    try {
-      const { error } = await authClient.signIn.social(
-        {
-          provider: provider,
           callbackURL: "/",
         },
         {
@@ -170,7 +146,9 @@ export const SignUpView = () => {
                     type="button"
                     className="w-full"
                     disabled={pending}
-                    onClick={() => onSocial("google")}
+                    onClick={() =>
+                      handleSocialAuth("google", setError, setPending)
+                    }
                   >
                     Google
                   </Button>
@@ -179,7 +157,9 @@ export const SignUpView = () => {
                     type="button"
                     className="w-full"
                     disabled={pending}
-                    onClick={() => onSocial("github")}
+                    onClick={() =>
+                      handleSocialAuth("github", setError, setPending)
+                    }
                   >
                     GitHub
                   </Button>
