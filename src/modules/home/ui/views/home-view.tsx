@@ -2,9 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export const HomeView = () => {
   const { data: session } = authClient.useSession();
+  // Client side navigation
+  const router = useRouter();
 
   if (!session) {
     return <p>Loading...</p>;
@@ -13,7 +16,17 @@ export const HomeView = () => {
   return (
     <div className="p-4 flex flex-col gap-y-4">
       <p>Logged in as {session?.user.name}</p>
-      <Button onClick={() => authClient.signOut()}>Sign out</Button>
+      <Button
+        onClick={() =>
+          authClient.signOut({
+            fetchOptions: {
+              onSuccess: () => router.push("/sign-in"),
+            },
+          })
+        }
+      >
+        Sign out
+      </Button>
     </div>
   );
 };
