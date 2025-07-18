@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { handleSocialAuth } from "./authUtils";
+import { FaGoogle, FaGithub } from "react-icons/fa";
 
 const formSchema = z.object({
   email: z.email(),
@@ -133,7 +134,7 @@ export const SignInView = () => {
                       handleSocialAuth("google", setError, setPending)
                     }
                   >
-                    Google
+                    <FaGoogle />
                   </Button>
                   <Button
                     variant="outline"
@@ -144,7 +145,7 @@ export const SignInView = () => {
                       handleSocialAuth("github", setError, setPending)
                     }
                   >
-                    Github
+                    <FaGithub />
                   </Button>
                 </div>
                 <div className="text-center text-sm">
