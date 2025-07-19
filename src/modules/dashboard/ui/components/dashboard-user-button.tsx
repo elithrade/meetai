@@ -67,7 +67,6 @@ export const DashboardUserButton = () => {
           <p className="text-sm truncate w-full">{user.name}</p>
           <p className="text-xs truncate w-full">{user.email}</p>
         </div>
-        <ChevronDownIcon className="size-4 shrink-0" />
       </>
     );
   };
@@ -116,6 +115,7 @@ export const DashboardUserButton = () => {
     <DropdownMenu>
       <DropdownMenuTrigger className="rounded-lg border border-border/10 p-3 w-full flex items-center justify-between bg-white/5 hover:bg-white/10 overflow-hidden">
         {renderUserAvatar(data.user)}
+        <ChevronDownIcon className="size-4 shrink-0" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="right" className="w-72">
         <DropdownMenuLabel>
