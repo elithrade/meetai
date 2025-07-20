@@ -18,7 +18,7 @@ const Page = async () => {
 
   return (
     <>
-      {"Server"}
+      {session.user.name ? `Welcome, ${session.user.name}` : "Dashboard"}
       <p>{data.greeting}</p>
       <HomeView />
     </>
