@@ -26,7 +26,10 @@ function getQueryClient() {
 function getUrl() {
   const base = (() => {
     if (typeof window !== "undefined") return "";
-    return process.env.NEXT_PUBLIC_APP_URL || "";
+    if (!process.env.NEXT_PUBLIC_APP_URL) {
+      throw new Error("Environment variable NEXT_PUBLIC_APP_URL is not set. Please configure it to proceed.");
+    }
+    return process.env.NEXT_PUBLIC_APP_URL;
   })();
   return `${base}/api/trpc`;
 }
