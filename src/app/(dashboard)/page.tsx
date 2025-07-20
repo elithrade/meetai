@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { HomeView } from "@/modules/home/ui/views/home-view";
+import { caller } from "@/trpc/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -13,7 +14,15 @@ const Page = async () => {
     redirect("/sign-in");
   }
 
-  return <HomeView />;
+  const data = await caller.hello({ text: session.user.name || "Guest" });
+
+  return (
+    <>
+      {"Server"}
+      <p>{data.greeting}</p>
+      <HomeView />
+    </>
+  );
 };
 
 export default Page;
