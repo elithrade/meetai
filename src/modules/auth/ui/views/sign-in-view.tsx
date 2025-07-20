@@ -23,7 +23,7 @@ import { handleSocialAuth } from "./authUtils";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 
 const formSchema = z.object({
-  email: z.email(),
+  email: z.string().email(),
   password: z.string().min(1, { message: "Password is required" }),
 });
 
