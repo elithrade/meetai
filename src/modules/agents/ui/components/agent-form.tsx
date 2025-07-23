@@ -46,7 +46,7 @@ export const AgentForm = ({
           );
         }
         // Close it
-        // onSuccess?.();
+        onSuccess?.();
       },
       onError: (error) => {
         toast.error(error.message);
@@ -107,24 +107,24 @@ export const AgentForm = ({
                 />
               </FormControl>
               <FormMessage />
-              <div className="flex justify-between gap-x-2">
-                {onCancel && (
-                  <Button
-                    disabled={isPending}
-                    type="button"
-                    variant="ghost"
-                    onClick={onCancel}
-                  >
-                    Cancel
-                  </Button>
-                )}
-                <Button disabled={isPending} type="submit">
-                  {isEdit ? "Update" : "Create"}
-                </Button>
-              </div>
             </FormItem>
           )}
         />
+        <div className="flex justify-between gap-x-2">
+          {onCancel && (
+            <Button
+              disabled={isPending}
+              type="button"
+              variant="ghost"
+              onClick={onCancel}
+            >
+              Cancel
+            </Button>
+          )}
+          <Button disabled={isPending} type="submit">
+            {isEdit ? "Update" : "Create"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
