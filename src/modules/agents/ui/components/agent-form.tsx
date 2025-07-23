@@ -2,7 +2,6 @@
 
 import { useTRPC } from "@/trpc/client";
 import { AgentGetOne } from "../../types";
-import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { agentInsertSchema } from "../../schemas";
@@ -14,9 +13,13 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { GeneratedAvatar } from "@/components/generated-avatar";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 type AgentFormProps = {
   onSuccess?: () => void;
@@ -30,13 +33,24 @@ export const AgentForm = ({
   initialValues,
 }: AgentFormProps) => {
   const trpc = useTRPC();
-  const router = useRouter();
-  const client = useQueryClient();
+  const queryClient = useQueryClient();
 
   const createAgent = useMutation(
     trpc.agents.create.mutationOptions({
-      onSuccess: () => {},
-      onError: () => {},
+      onSuccess: async () => {
+        // This tells React Query to refetch the agents list
+        await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions());
+        if (initialValues?.id) {
+          await queryClient.invalidateQueries(
+            trpc.agents.getOne.queryOptions({ id: initialValues.id }),
+          );
+        }
+        // Close it
+        // onSuccess?.();
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
     }),
   );
 
@@ -74,8 +88,40 @@ export const AgentForm = ({
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder="e.g. John or Math tutor" />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="instructions"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Instructions</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  placeholder="You are a helpful math assistance that can answer questions and help with assignments."
+                />
+              </FormControl>
+              <FormMessage />
+              <div className="flex justify-between gap-x-2">
+                {onCancel && (
+                  <Button
+                    disabled={isPending}
+                    type="button"
+                    variant="ghost"
+                    onClick={onCancel}
+                  >
+                    Cancel
+                  </Button>
+                )}
+                <Button disabled={isPending} type="submit">
+                  {isEdit ? "Update" : "Create"}
+                </Button>
+              </div>
             </FormItem>
           )}
         />
