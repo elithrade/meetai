@@ -1,4 +1,4 @@
-"ues client";
+"use client";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { AgentGetOne } from "../../types";
