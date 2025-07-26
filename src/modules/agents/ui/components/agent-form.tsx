@@ -39,7 +39,9 @@ export const AgentForm = ({
     trpc.agents.create.mutationOptions({
       onSuccess: async () => {
         // This tells React Query to refetch the agents list
-        await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions());
+        await queryClient.invalidateQueries(
+          trpc.agents.getMany.queryOptions({}),
+        );
         if (initialValues?.id) {
           await queryClient.invalidateQueries(
             trpc.agents.getOne.queryOptions({ id: initialValues.id }),
