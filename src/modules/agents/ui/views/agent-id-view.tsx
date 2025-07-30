@@ -13,6 +13,8 @@ import { VideoIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useConfirm } from "../../hooks/use-confirm";
+import { useState } from "react";
+import { UpdateAgentDialog } from "../components/update-agent-dialog";
 
 type Props = {
   agentId: string;
@@ -24,6 +26,8 @@ export const AgentIdView = ({ agentId }: Props) => {
   );
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const [updateAgentDialogOpen, setUpdateAgentDialogOpen] = useState(false);
 
   const removeAgent = useMutation(
     trpc.agents.remove.mutationOptions({
@@ -50,14 +54,20 @@ export const AgentIdView = ({ agentId }: Props) => {
     }
     await removeAgent.mutateAsync({ id: agentId });
   };
+
   return (
     <>
       <RemoveAgentDialog />
+      <UpdateAgentDialog
+        open={updateAgentDialogOpen}
+        onOpenChange={setUpdateAgentDialogOpen}
+        initialValues={data}
+      />
       <div className="flex-1 py-4 px-4 md:px-8 flex flex-col gap-y-4">
         <AgentIdViewHeader
           agentId={agentId}
           agentName={data.name}
-          onEdit={() => {}}
+          onEdit={() => setUpdateAgentDialogOpen(true)}
           onRemove={handleRemoveAgent}
         />
         <div className="bg-white rounded-lg border">
