@@ -59,11 +59,14 @@ export const meetingsRouter = createTRPCRouter({
           and(eq(meetings.id, input.id), eq(meetings.userId, ctx.auth.user.id)),
         );
 
-      if (!exitingMeeting) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Meeting not found" });
+      if (!existingMeeting) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Meeting not found",
+        });
       }
 
-      return exitingMeeting;
+      return existingMeeting;
     }),
   getMany: protectedProcedure
     .input(
