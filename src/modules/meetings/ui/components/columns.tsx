@@ -40,8 +40,9 @@ const statusColorMap = {
   cancelled: "bg-gray-300/20 text-gray-800 border-gray-800/5",
 };
 
-// The procedure getMany returns data with agent and meeting duration
-// and simply select one by using the number operator.
+// Defines the columns for a table displaying meeting data.
+// Each column represents a specific attribute of a meeting, such as
+// the meeting name, agent information, status, and duration.
 export const columns: ColumnDef<MeetingGetMany[number]>[] = [
   {
     accessorKey: "name",
