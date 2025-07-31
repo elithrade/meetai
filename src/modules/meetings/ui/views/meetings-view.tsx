@@ -12,8 +12,9 @@ export const MeetingsView = () => {
 
   return (
     <div className="flex-1 pb-4 px-4 md:px-8 flex flex-col gap-y-4">
-      <DataTable data={data.items} columns={columns} />
-      {data.items.length === 0 && (
+      {data.items.length > 0 ? (
+        <DataTable data={data.items} columns={columns} />
+      ) : (
         <EmptyState
           title="Create your first meeting"
           description="Schedule a meeting to start interacting with your agents. Meetings can be used to discuss topics, share ideas, and collaborate in real-time."
