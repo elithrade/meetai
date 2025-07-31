@@ -28,7 +28,7 @@ const Page = async () => {
         <Suspense
           fallback={
             <LoadingState
-              title="Loading agents"
+              title="Loading meetings"
               description="This can take a few seconds"
             />
           }
