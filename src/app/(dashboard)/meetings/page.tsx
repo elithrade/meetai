@@ -36,7 +36,7 @@ const Page = async () => {
           <ErrorBoundary
             fallback={
               <ErrorState
-                title="Error loading agents"
+                title="Error loading meetings"
                 description="Please try again later."
               />
             }
