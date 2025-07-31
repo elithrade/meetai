@@ -112,8 +112,6 @@ export const meetingsRouter = createTRPCRouter({
       const [total] = await db
         .select({ count: count() })
         .from(meetings)
-        // TODO: Is this needed?
-        .innerJoin(agents, eq(meetings.agentId, agents.id))
         .where(
           and(
             eq(meetings.userId, ctx.auth.user.id),
