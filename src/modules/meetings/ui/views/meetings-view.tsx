@@ -1,11 +1,25 @@
 "use client";
 
+import { DataTable } from "@/components/data-table";
 import { useTRPC } from "@/trpc/client";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { columns } from "../components/columns";
+import { EmptyState } from "@/components/empty-state";
 
 export const MeetingsView = () => {
   const trpc = useTRPC();
-  const { data } = useQuery(trpc.meetings.getMany.queryOptions({}));
+  const { data } = useSuspenseQuery(trpc.meetings.getMany.queryOptions({}));
 
-  return <div>{JSON.stringify(data)}</div>;
+  return (
+    <div className="flex-1 pb-4 px-4 md:px-8 flex flex-col gap-y-4">
+      {data.items.length > 0 ? (
+        <DataTable data={data.items} columns={columns} />
+      ) : (
+        <EmptyState
+          title="Create your first meeting"
+          description="Schedule a meeting to start interacting with your agents. Meetings can be used to discuss topics, share ideas, and collaborate in real-time."
+        />
+      )}
+    </div>
+  );
 };
