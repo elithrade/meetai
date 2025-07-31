@@ -40,7 +40,7 @@ const statusColorMap = {
   cancelled: "bg-gray-300/20 text-gray-800 border-gray-800/5",
 };
 
-// In procudure getMany returns data with agent and meeting duration
+// In procedure getMany returns data with agent and meeting duration
 // and simply select one by using number operator.
 export const columns: ColumnDef<MeetingGetMany[number]>[] = [
   {
