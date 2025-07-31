@@ -20,7 +20,6 @@ type Props = {
   onSearch?: (value: string) => void;
   value: string;
   placeholder?: string;
-  isSearchable?: boolean;
   className?: string;
 };
 
@@ -30,7 +29,6 @@ export const CommandSelect = ({
   onSearch,
   value,
   placeholder,
-  isSearchable,
   className,
 }: Props) => {
   const [open, setOpen] = useState(false);
@@ -39,6 +37,7 @@ export const CommandSelect = ({
   return (
     <>
       <Button
+        onClick={() => setOpen(true)}
         type="button"
         variant="outline"
         className={cn(
@@ -50,27 +49,30 @@ export const CommandSelect = ({
         <div>{selectedOption ? selectedOption.children : placeholder}</div>
         <ChevronsUpDownIcon />
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search..." onValueChange={onSearch}>
-          <CommandList>
-            <CommandEmpty>
-              <span className="text-sm text-muted-foreground">
-                No options found
-              </span>
-            </CommandEmpty>
-            {options.map((option) => (
-              <CommandItem
-                key={option.id}
-                onSelect={() => {
-                  onSelect(option.value);
-                  setOpen(false);
-                }}
-              >
-                {option.children}
-              </CommandItem>
-            ))}
-          </CommandList>
-        </CommandInput>
+      <CommandDialog
+        shouldFilter={!onSearch}
+        open={open}
+        onOpenChange={setOpen}
+      >
+        <CommandInput placeholder="Search..." onValueChange={onSearch} />
+        <CommandList>
+          <CommandEmpty>
+            <span className="text-sm text-muted-foreground">
+              No options found
+            </span>
+          </CommandEmpty>
+          {options.map((option) => (
+            <CommandItem
+              key={option.id}
+              onSelect={() => {
+                onSelect(option.value);
+                setOpen(false);
+              }}
+            >
+              {option.children}
+            </CommandItem>
+          ))}
+        </CommandList>
       </CommandDialog>
     </>
   );
