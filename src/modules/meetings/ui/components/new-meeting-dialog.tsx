@@ -2,7 +2,7 @@ import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { MeetingForm } from "./meeting-form";
 import { useRouter } from "next/navigation";
 
-type NewAgentDialogProps = {
+type NewMeetingDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
@@ -10,7 +10,7 @@ type NewAgentDialogProps = {
 export const NewMeetingDialog = ({
   open,
   onOpenChange,
-}: NewAgentDialogProps) => {
+}: NewMeetingDialogProps) => {
   const router = useRouter();
   return (
     <ResponsiveDialog
