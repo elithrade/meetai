@@ -5,6 +5,7 @@ import { CommandSelect } from "@/components/command-select";
 import { useMeetingsFilters } from "@/modules/meetings/hooks/use-meetings-filters";
 import { GeneratedAvatar } from "@/components/generated-avatar";
 import { useTRPC } from "@/trpc/client";
+import { MAX_PAGE_SIZE } from "@/constants";
 
 export const AgentIdFilter = () => {
   const [filters, setFilters] = useMeetingsFilters();
@@ -13,7 +14,10 @@ export const AgentIdFilter = () => {
 
   const [agentSearch, setAgentSearch] = useState("");
   const { data } = useQuery(
-    trpc.agents.getMany.queryOptions({ pageSize: MAX_AGENTS_IN_FILTER, search: agentSearch }),
+    trpc.agents.getMany.queryOptions({
+      pageSize: MAX_PAGE_SIZE,
+      search: agentSearch,
+    }),
   );
 
   return (
