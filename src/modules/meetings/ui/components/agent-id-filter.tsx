@@ -13,7 +13,7 @@ export const AgentIdFilter = () => {
 
   const [agentSearch, setAgentSearch] = useState("");
   const { data } = useQuery(
-    trpc.agents.getMany.queryOptions({ pageSize: 100, search: agentSearch }),
+    trpc.agents.getMany.queryOptions({ pageSize: MAX_AGENTS_IN_FILTER, search: agentSearch }),
   );
 
   return (
