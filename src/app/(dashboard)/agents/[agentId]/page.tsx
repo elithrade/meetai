@@ -11,6 +11,7 @@ type Props = {
 };
 
 const Page = async ({ params }: Props) => {
+  // TODO: Implement session checks.
   const { agentId } = await params;
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(
