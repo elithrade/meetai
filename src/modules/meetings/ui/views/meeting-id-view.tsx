@@ -12,6 +12,10 @@ import { toast } from "sonner";
 import { useConfirm } from "../../hooks/use-confirm";
 import { UpdateMeetingDialog } from "../components/update-meeting-dialog";
 import { useState } from "react";
+import { UpcomingState } from "../components/upcoming-state";
+import { ActiveState } from "../components/active-state";
+import { CancelledState } from "../components/cancelled-state";
+import { ProcessingState } from "../components/processing-state";
 
 type Prosp = {
   meetingId: string;
@@ -55,6 +59,12 @@ export const MeetingIdView = ({ meetingId }: Prosp) => {
     await removeMeeting.mutateAsync({ id: meetingId });
   };
 
+  const isActive = data.status === "active";
+  const isUpcoming = data.status === "upcoming";
+  const isCancelled = data.status === "cancelled";
+  const isCompleted = data.status === "completed";
+  const isProcesssing = data.status === "processing";
+
   return (
     <>
       <RemoveMeetingDialog />
@@ -72,7 +82,17 @@ export const MeetingIdView = ({ meetingId }: Prosp) => {
           }}
           onRemove={handleRemoveMeeting}
         />
-        {JSON.stringify(data, null, 2)}
+        {isCancelled && <CancelledState />}
+        {isProcesssing && <ProcessingState />}
+        {isCompleted && <div>completed</div>}
+        {isActive && <ActiveState meetingId={meetingId} />}
+        {isUpcoming && (
+          <UpcomingState
+            meetingId={meetingId}
+            onCancelMeeting={() => {}}
+            isCancelling={false}
+          />
+        )}
       </div>
     </>
   );
