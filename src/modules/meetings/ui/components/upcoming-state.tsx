@@ -20,7 +20,7 @@ export const UpcomingState = ({
         title="Not started yet"
         description="This meeting is not started. Once the meeting starts, meeting details will be available here."
       />
-      <div className="flex flex-col-reverese lg:flex-row lg:justify-center items-center gap-2 w-full">
+      <div className="flex flex-col-reverse lg:flex-row lg:justify-center items-center gap-2 w-full">
         <Button
           variant="secondary"
           className="w-full lg:w-auto"
