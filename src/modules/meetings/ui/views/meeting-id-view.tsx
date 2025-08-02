@@ -63,7 +63,7 @@ export const MeetingIdView = ({ meetingId }: Prosp) => {
   const isUpcoming = data.status === "upcoming";
   const isCancelled = data.status === "cancelled";
   const isCompleted = data.status === "completed";
-  const isProcesssing = data.status === "processing";
+  const isProcessing = data.status === "processing";
 
   return (
     <>
@@ -83,7 +83,7 @@ export const MeetingIdView = ({ meetingId }: Prosp) => {
           onRemove={handleRemoveMeeting}
         />
         {isCancelled && <CancelledState />}
-        {isProcesssing && <ProcessingState />}
+        {isProcessing && <ProcessingState />}
         {isCompleted && <div>completed</div>}
         {isActive && <ActiveState meetingId={meetingId} />}
         {isUpcoming && (
