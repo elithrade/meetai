@@ -14,7 +14,7 @@ export const ActiveState = ({ meetingId }: Props) => {
         title="Meeting is active"
         description="Meeting will end once all participants leave the call."
       />
-      <div className="flex flex-col-reverese lg:flex-row lg:justify-center items-center gap-2 w-full">
+      <div className="flex flex-col-reverse lg:flex-row lg:justify-center items-center gap-2 w-full">
         <Button asChild className="w-full lg:w-auto">
           <Link href={`/call/${meetingId}`}>
             <VideoIcon />
