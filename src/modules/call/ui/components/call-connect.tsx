@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Call,
   CallingState,
@@ -41,6 +39,7 @@ export const CallConnect = ({
       const token = await generateToken();
       return token;
     } catch (error) {
+      console.error("Token generation failed:", error);
       throw error;
     }
   }, [generateToken]);
