@@ -7,7 +7,7 @@ type Props = {
 };
 
 export const EmptyState = ({ title, description, image }: Props) => {
-  const imageSrc = image || "/images/empty-state.svg";
+  const imageSrc = image || "/empty.svg";
   return (
     <div className="flex flex-col items-center justify-center">
       <Image src={imageSrc} alt="Empty" width={240} height={240} />
