@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Call,
   CallingState,
@@ -37,10 +39,8 @@ export const CallConnect = ({
   const tokenProvider = useCallback(async () => {
     try {
       const token = await generateToken();
-      console.log("TokenProvider called, generated token:", token);
       return token;
     } catch (error) {
-      console.error("Token generation failed:", error);
       throw error;
     }
   }, [generateToken]);
