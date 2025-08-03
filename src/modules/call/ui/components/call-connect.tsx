@@ -7,7 +7,7 @@ import {
 } from "@stream-io/video-react-sdk";
 
 import { LoaderIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 
@@ -34,6 +34,17 @@ export const CallConnect = ({
     trpc.meetings.generateStreamToken.mutationOptions(),
   );
 
+  const tokenProvider = useCallback(async () => {
+    try {
+      const token = await generateToken();
+      console.log("TokenProvider called, generated token:", token);
+      return token;
+    } catch (error) {
+      console.error("Token generation failed:", error);
+      throw error;
+    }
+  }, [generateToken]);
+
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   useEffect(() => {
     const _client = new StreamVideoClient({
@@ -43,7 +54,7 @@ export const CallConnect = ({
         name: userName,
         image: userAvatar,
       },
-      tokenProvider: generateToken,
+      tokenProvider,
     });
 
     setClient(_client);
@@ -52,7 +63,7 @@ export const CallConnect = ({
       _client.disconnectUser();
       setClient(null);
     };
-  }, [generateToken, userAvatar, userId, userName]);
+  }, [generateToken, tokenProvider, userAvatar, userId, userName]);
 
   const [call, setCall] = useState<Call | null>(null);
   useEffect(() => {
