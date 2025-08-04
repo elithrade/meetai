@@ -1,5 +1,5 @@
 import { MeetingGetOne } from "../../types";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BookOpenTextIcon,
@@ -14,6 +14,7 @@ import { GeneratedAvatar } from "@/components/generated-avatar";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration } from "@/lib/utils";
+import { Transcript } from "./transcript";
 
 type Props = {
   data: MeetingGetOne;
@@ -142,6 +143,9 @@ export const CompletedState = ({ data }: Props) => {
               controls
             />
           </div>
+        </TabsContent>
+        <TabsContent value="transcript">
+          <Transcript meetingId={data.id} />
         </TabsContent>
       </Tabs>
     </div>
