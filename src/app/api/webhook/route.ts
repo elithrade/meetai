@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     // TODO: Extract db access to a separate function.
     await db
       .update(meetings)
-      .set({ status: MeetingStatus.Active })
+      .set({ status: MeetingStatus.Active, startedAt: new Date() })
       .where(eq(meetings.id, meetingId));
 
     const [existingAgent] = await db
