@@ -125,12 +125,12 @@ export async function POST(request: NextRequest) {
       );
   } else if (eventType === "call.transcription_ready") {
     const event = payload as CallTranscriptionReadyEvent;
-    const meetintId = event.call_cid.split(":")[1];
+    const meetingId = event.call_cid.split(":")[1];
 
     const [updatedMeeting] = await db
       .update(meetings)
       .set({ transcriptUrl: event.call_transcription.url })
-      .where(eq(meetings.id, meetintId))
+      .where(eq(meetings.id, meetingId))
       .returning();
 
     if (!updatedMeeting) {
