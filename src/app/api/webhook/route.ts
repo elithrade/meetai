@@ -1,24 +1,26 @@
-import { and, or, not, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
   CallTranscriptionReadyEvent,
   CallSessionParticipantLeftEvent,
   CallRecordingReadyEvent,
   CallSessionStartedEvent,
+  CallEndedEvent,
 } from "@stream-io/node-sdk";
 
-import { NexrRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/db";
 
 import { agents, meetings } from "@/db/schema";
 import { streamVideo } from "@/lib/stream-video";
 import { MeetingStatus } from "@/modules/meetings/types";
+import { inngest } from "@/inngest/client";
 
 function verifySignature(body: string, signature: string): boolean {
   return streamVideo.verifyWebhook(body, signature);
 }
 
-export async function POST(request: NexrRequest) {
+export async function POST(request: NextRequest) {
   const signature = request.headers.get("x-signature");
   const apiKey = request.headers.get("x-api-key");
 
@@ -43,6 +45,7 @@ export async function POST(request: NexrRequest) {
   }
 
   const eventType = (payload as Record<string, unknown>)?.type;
+
   if (eventType === "call.session_started") {
     const event = payload as CallSessionStartedEvent;
     const meetingId = event.call.custom?.meetingId as string;
@@ -51,7 +54,7 @@ export async function POST(request: NexrRequest) {
       return NextResponse.json({ error: "Missing meetingId" }, { status: 400 });
     }
 
-    // TODO: Extract db access to a separate function
+    // TODO: Extract db access to a separate function.
     const [existingMeeting] = await db
       .select()
       .from(meetings)
@@ -66,10 +69,10 @@ export async function POST(request: NexrRequest) {
       return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
     }
 
-    // TODO: Extract db access to a separate function
+    // TODO: Extract db access to a separate function.
     await db
       .update(meetings)
-      .set({ status: MeetingStatus.Active })
+      .set({ status: MeetingStatus.Active, startedAt: new Date() })
       .where(eq(meetings.id, meetingId));
 
     const [existingAgent] = await db
@@ -103,6 +106,52 @@ export async function POST(request: NexrRequest) {
     // Failsafe for ending the call.
     const call = streamVideo.video.call("default", meetingId);
     await call.end();
+  } else if (eventType === "call.session_ended") {
+    const event = payload as CallEndedEvent;
+    const meetingId = event.call.custom?.meetingId as string;
+
+    if (!meetingId) {
+      return NextResponse.json({ error: "Missing meetingId" }, { status: 400 });
+    }
+
+    await db
+      .update(meetings)
+      .set({ status: MeetingStatus.Processing, endedAt: new Date() })
+      .where(
+        and(
+          eq(meetings.id, meetingId),
+          eq(meetings.status, MeetingStatus.Active),
+        ),
+      );
+  } else if (eventType === "call.transcription_ready") {
+    const event = payload as CallTranscriptionReadyEvent;
+    const meetintId = event.call_cid.split(":")[1];
+
+    const [updatedMeeting] = await db
+      .update(meetings)
+      .set({ transcriptUrl: event.call_transcription.url })
+      .where(eq(meetings.id, meetintId))
+      .returning();
+
+    if (!updatedMeeting) {
+      return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
+    }
+
+    await inngest.send({
+      name: "meetings/processing",
+      data: {
+        meetingId: updatedMeeting.id,
+        transcriptUrl: updatedMeeting.transcriptUrl,
+      },
+    });
+  } else if (eventType === "call.recording_ready") {
+    const event = payload as CallRecordingReadyEvent;
+    const meetintId = event.call_cid.split(":")[1];
+
+    await db
+      .update(meetings)
+      .set({ recordingUrl: event.call_recording.url })
+      .where(eq(meetings.id, meetintId));
   }
 
   return NextResponse.json({ status: "ok" });
