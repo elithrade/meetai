@@ -63,13 +63,13 @@ export const AgentForm = ({
             trpc.agents.getOne.queryOptions({ id: initialValues.id }),
           );
         }
-        // TODO: Invalidate free tier usage
+        // TODO: Invalidate free tier usage.
         // Close it
         onSuccess?.();
       },
       onError: (error) => {
         toast.error(error.message);
-        // TODO: Check error code "FORBIDDEN" then redirect to /upgrade
+        // TODO: Check error code "FORBIDDEN" then redirect to /upgrade.
       },
     }),
   );

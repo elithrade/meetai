@@ -36,7 +36,7 @@ export const MeetingIdView = ({ meetingId }: Prosp) => {
     trpc.meetings.remove.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries(trpc.meetings.getMany.queryOptions({}));
-        // TODO: Invalidate free tier usage
+        // TODO: Invalidate free tier usage.
         router.push("/meetings");
       },
       onError: (error) => {
