@@ -21,6 +21,7 @@ import { streamVideo } from "@/lib/stream-video";
 import { MeetingStatus } from "@/modules/meetings/types";
 import { inngest } from "@/inngest/client";
 import { streamChat } from "@/lib/stream-chat";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions/index.mjs";
 
 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -222,19 +223,17 @@ export async function POST(request: NextRequest) {
       const channel = streamChat.channel("messaging", channelId);
       await channel.watch();
 
-      const previousMessages: Array<{
-        role: "user" | "assistant";
-        content: string;
-      }> = channel.state.messages
-        .slice(-5)
-        .filter((m) => m.text && m.text.trim() !== "")
-        .map((m) => {
-          const isAssistant = m.user?.id === existingAgent.id;
-          return {
-            role: isAssistant ? ("assistant" as const) : ("user" as const),
-            content: m.text!, // Non-null assertion since we filtered above
-          };
-        });
+      const previousMessages: ChatCompletionMessageParam[] =
+        channel.state.messages
+          .slice(-5)
+          .filter((m) => m.text && m.text.trim() !== "")
+          .map((m) => {
+            const isAssistant = m.user?.id === existingAgent.id;
+            return {
+              role: isAssistant ? "assistant" : "user",
+              content: m.text!,
+            };
+          });
 
       const GPTResponse = await openaiClient.chat.completions.create({
         messages: [
