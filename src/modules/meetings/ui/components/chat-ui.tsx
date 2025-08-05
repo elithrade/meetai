@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import type { Channel as StreamChannel } from "stream-chat";
 import {
@@ -37,9 +37,14 @@ export const ChatUI = ({
   );
 
   const [channel, setChannel] = useState<StreamChannel | undefined>(undefined);
+
+  const tokenProvider = useCallback(async () => {
+    return await generateChatToken();
+  }, [generateChatToken]);
+
   const client = useCreateChatClient({
     apiKey: process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY!,
-    tokenOrProvider: generateChatToken, // TODO: We might need to useCallback.
+    tokenOrProvider: tokenProvider,
     userData: {
       id: userId,
       name: userName,
