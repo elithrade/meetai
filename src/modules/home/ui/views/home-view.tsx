@@ -1,5 +1,12 @@
 "use client";
 
+import { LoadingState } from "@/components/loading-state";
+
 export const HomeView = () => {
-  return <div className="p-4 flex flex-col gap-y-4">Home view</div>;
+  return (
+    <LoadingState
+      title="Redirecting..."
+      description="Please wait while we redirect you to the meetings page."
+    />
+  );
 };
