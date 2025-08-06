@@ -1,6 +1,3 @@
-import { db } from "@/db";
-import { agents } from "@/db/schema";
-import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { agentInsertSchema, agentUpdateSchema } from "../schemas";
 import z from "zod";
@@ -17,13 +14,10 @@ export const agentsRouter = createTRPCRouter({
   update: protectedProcedure
     .input(agentUpdateSchema)
     .mutation(async ({ input, ctx }) => {
-      const [updatedAgent] = await db
-        .update(agents)
-        .set(input)
-        .where(
-          and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id)),
-        )
-        .returning();
+      const updatedAgent = await AgentsService.updateAgent(
+        input,
+        ctx.auth.user.id,
+      );
 
       if (!updatedAgent) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Agent not found" });
@@ -31,15 +25,14 @@ export const agentsRouter = createTRPCRouter({
 
       return updatedAgent;
     }),
+
   remove: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const [removedAgent] = await db
-        .delete(agents)
-        .where(
-          and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id)),
-        )
-        .returning();
+      const removedAgent = await AgentsService.removeAgent(
+        input.id,
+        ctx.auth.user.id,
+      );
 
       if (!removedAgent) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Agent not found" });
@@ -47,19 +40,14 @@ export const agentsRouter = createTRPCRouter({
 
       return removedAgent;
     }),
+
   getOne: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      const [existingAgent] = await db
-        .select({
-          // TODO: Implement the actual meeting count logic.
-          meetingCount: sql<number>`5`,
-          ...getTableColumns(agents),
-        })
-        .from(agents)
-        .where(
-          and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id)),
-        );
+      const existingAgent = await AgentsService.getAgentById(
+        input.id,
+        ctx.auth.user.id,
+      );
 
       if (!existingAgent) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Agent not found" });
@@ -92,11 +80,6 @@ export const agentsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(agentInsertSchema)
     .mutation(async ({ input, ctx }) => {
-      const [createdAgent] = await db
-        .insert(agents)
-        .values({ ...input, userId: ctx.auth.user.id })
-        .returning();
-
-      return createdAgent;
+      return await AgentsService.createAgent(input, ctx.auth.user.id);
     }),
 });

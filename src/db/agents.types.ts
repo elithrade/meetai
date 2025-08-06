@@ -1,3 +1,6 @@
+import { agentInsertSchema, agentUpdateSchema } from "@/modules/agents/schemas";
+import z from "zod";
+
 export type GetManyAgentsParams = {
   userId: string;
   page: number;
@@ -17,3 +20,16 @@ export type GetManyAgentsResult = {
   total: number;
   totalPages: number;
 };
+
+export interface AgentWithMeetingCount {
+  meetingCount: number;
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type AgentInsert = z.infer<typeof agentInsertSchema>;
+
+export type AgentUpdate = z.infer<typeof agentUpdateSchema>;

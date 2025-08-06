@@ -1,5 +1,11 @@
 import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
-import { GetManyAgentsParams, GetManyAgentsResult } from "./agents.types";
+import {
+  AgentInsert,
+  AgentUpdate,
+  AgentWithMeetingCount,
+  GetManyAgentsParams,
+  GetManyAgentsResult,
+} from "./agents.types";
 import { agents } from "./schema";
 import { db } from ".";
 
@@ -38,5 +44,49 @@ export class AgentsService {
       total: total.count,
       totalPages,
     };
+  }
+
+  static async getAgentById(
+    agentId: string,
+    userId: string,
+  ): Promise<AgentWithMeetingCount | undefined> {
+    const [existingAgent] = await db
+      .select({
+        // TODO: Implement the actual meeting count logic.
+        meetingCount: sql<number>`5`,
+        ...getTableColumns(agents),
+      })
+      .from(agents)
+      .where(and(eq(agents.id, agentId), eq(agents.userId, userId)));
+
+    return existingAgent;
+  }
+
+  static async updateAgent(agentData: AgentUpdate, userId: string) {
+    const [updatedAgent] = await db
+      .update(agents)
+      .set(agentData)
+      .where(and(eq(agents.id, agentData.id), eq(agents.userId, userId)))
+      .returning();
+
+    return updatedAgent;
+  }
+
+  static async removeAgent(agentId: string, userId: string) {
+    const [removedAgent] = await db
+      .delete(agents)
+      .where(and(eq(agents.id, agentId), eq(agents.userId, userId)))
+      .returning();
+
+    return removedAgent;
+  }
+
+  static async createAgent(agentData: AgentInsert, userId: string) {
+    const [createdAgent] = await db
+      .insert(agents)
+      .values({ ...agentData, userId })
+      .returning();
+
+    return createdAgent;
   }
 }
