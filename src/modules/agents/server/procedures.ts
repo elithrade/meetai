@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { agents } from "@/db/schema";
-import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { agentInsertSchema, agentUpdateSchema } from "../schemas";
 import z from "zod";
@@ -11,6 +11,7 @@ import {
   MIN_PAGE_SIZE,
 } from "@/constants";
 import { TRPCError } from "@trpc/server";
+import { AgentsService } from "@/db/agents.service";
 
 export const agentsRouter = createTRPCRouter({
   update: protectedProcedure
@@ -66,6 +67,7 @@ export const agentsRouter = createTRPCRouter({
 
       return existingAgent;
     }),
+
   getMany: protectedProcedure
     .input(
       z.object({
@@ -79,42 +81,14 @@ export const agentsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { search, page, pageSize } = input;
-      const data = await db
-        .select({
-          // TODO: Implement the actual meeting count logic.
-          meetingCount: sql<number>`6`,
-          ...getTableColumns(agents),
-        })
-        .from(agents)
-        .where(
-          and(
-            eq(agents.userId, ctx.auth.user.id),
-            search ? ilike(agents.name, `%${search}%`) : undefined,
-          ),
-        )
-        .orderBy(desc(agents.createdAt), desc(agents.id))
-        .limit(pageSize)
-        .offset((page - 1) * pageSize);
-
-      const [total] = await db
-        .select({ count: count() })
-        .from(agents)
-        .where(
-          and(
-            eq(agents.userId, ctx.auth.user.id),
-            search ? ilike(agents.name, `%${search}%`) : undefined,
-          ),
-        );
-
-      const totalPages = Math.ceil(total.count / pageSize);
-
-      return {
-        items: data,
-        total: total.count,
-        totalPages,
-      };
+      return await AgentsService.getManyAgents({
+        userId: ctx.auth.user.id,
+        page: input.page,
+        pageSize: input.pageSize,
+        search: input.search,
+      });
     }),
+
   create: protectedProcedure
     .input(agentInsertSchema)
     .mutation(async ({ input, ctx }) => {
