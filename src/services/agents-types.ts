@@ -9,14 +9,7 @@ export type GetManyAgentsParams = {
 };
 
 export type GetManyAgentsResult = {
-  items: Array<{
-    meetingCount: number;
-    id: string;
-    userId: string;
-    name: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
+  items: Array<AgentWithMeetingCount>;
   total: number;
   totalPages: number;
 };
@@ -26,6 +19,7 @@ export type AgentWithMeetingCount = {
   id: string;
   userId: string;
   name: string;
+  instructions: string;
   createdAt: Date;
   updatedAt: Date;
 };

@@ -1,10 +1,10 @@
 import { MeetingStatus } from "@/modules/meetings/types";
-import { agents, meetings } from "./schema";
 import z from "zod";
 import {
   meetingInsertSchema,
   meetingUpdateSchema,
 } from "@/modules/meetings/schema";
+import { agents, meetings } from "@/db/schema";
 
 export type GetManyMeetingsParams = {
   userId: string;
