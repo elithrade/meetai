@@ -14,6 +14,18 @@ pnpm dev
 bun dev
 ```
 
+Then, run the command to start the web-hook for handling messages:
+
+```
+npm run dev:webhook
+```
+
+Then, run the command to handle background processing tasks:
+
+```
+npx inngest-cli@latest dev
+```
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
