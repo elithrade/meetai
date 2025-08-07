@@ -1,15 +1,6 @@
 import { db } from "@/db";
 import { agents, meetings, user } from "@/db/schema";
-import {
-  and,
-  count,
-  desc,
-  eq,
-  getTableColumns,
-  ilike,
-  inArray,
-  sql,
-} from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import z from "zod";
 import {
@@ -25,8 +16,10 @@ import { streamVideo } from "@/lib/stream-video";
 import { generateAvatarUri } from "@/lib/avatar";
 import JSONL from "jsonl-parse-stringify";
 import { streamChat } from "@/lib/stream-chat";
+import { MeetingsService } from "@/db/meetings.service";
 
 export const meetingsRouter = createTRPCRouter({
+  // TODO: Move this to stream service.
   generateChatToken: protectedProcedure.mutation(async ({ ctx }) => {
     const token = streamChat.createToken(ctx.auth.user.id);
     await streamChat.upsertUser({
@@ -36,6 +29,8 @@ export const meetingsRouter = createTRPCRouter({
 
     return token;
   }),
+
+  // TODO: Move this to stream service.
   getTranscript: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
@@ -125,6 +120,8 @@ export const meetingsRouter = createTRPCRouter({
 
       return transcriptWithSpeakers;
     }),
+
+  // TODO: Move this to stream service.
   generateStreamToken: protectedProcedure.mutation(async ({ ctx }) => {
     await streamVideo.upsertUsers([
       {
@@ -148,15 +145,14 @@ export const meetingsRouter = createTRPCRouter({
 
     return token;
   }),
+
   remove: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const [removedMeeting] = await db
-        .delete(meetings)
-        .where(
-          and(eq(meetings.id, input.id), eq(meetings.userId, ctx.auth.user.id)),
-        )
-        .returning();
+      const removedMeeting = await MeetingsService.removeMeeting(
+        input.id,
+        ctx.auth.user.id,
+      );
 
       if (!removedMeeting) {
         throw new TRPCError({
@@ -167,16 +163,14 @@ export const meetingsRouter = createTRPCRouter({
 
       return removedMeeting;
     }),
+
   update: protectedProcedure
     .input(meetingUpdateSchema)
     .mutation(async ({ input, ctx }) => {
-      const [updatedMeeting] = await db
-        .update(meetings)
-        .set(input)
-        .where(
-          and(eq(meetings.id, input.id), eq(meetings.userId, ctx.auth.user.id)),
-        )
-        .returning();
+      const updatedMeeting = await MeetingsService.updateMeeting(
+        input,
+        ctx.auth.user.id,
+      );
 
       if (!updatedMeeting) {
         throw new TRPCError({
@@ -187,17 +181,16 @@ export const meetingsRouter = createTRPCRouter({
 
       return updatedMeeting;
     }),
+
   create: protectedProcedure
     .input(meetingInsertSchema)
     .mutation(async ({ input, ctx }) => {
-      const [createdMeeting] = await db
-        .insert(meetings)
-        .values({
-          ...input,
-          userId: ctx.auth.user.id,
-        })
-        .returning();
+      const createdMeeting = await MeetingsService.createMeeting(
+        input,
+        ctx.auth.user.id,
+      );
 
+      // TODO: Extract this to stream service.
       const call = streamVideo.video.call("default", createdMeeting.id);
       await call.create({
         data: {
@@ -220,6 +213,7 @@ export const meetingsRouter = createTRPCRouter({
         },
       });
 
+      // TODO: Replace with getAgentById from agents service.
       const [existingAgent] = await db
         .select()
         .from(agents)
@@ -243,23 +237,14 @@ export const meetingsRouter = createTRPCRouter({
 
       return createdMeeting;
     }),
+
   getOne: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      const [existingMeeting] = await db
-        .select({
-          ...getTableColumns(meetings),
-          agent: agents,
-          duration:
-            sql<number>`EXTRACT(EPOCH FROM ${meetings.endedAt} - ${meetings.startedAt})`.as(
-              "duration",
-            ),
-        })
-        .from(meetings)
-        .innerJoin(agents, eq(meetings.agentId, agents.id))
-        .where(
-          and(eq(meetings.id, input.id), eq(meetings.userId, ctx.auth.user.id)),
-        );
+      const existingMeeting = await MeetingsService.getMeetingById(
+        input.id,
+        ctx.auth.user.id,
+      );
 
       if (!existingMeeting) {
         throw new TRPCError({
@@ -270,6 +255,7 @@ export const meetingsRouter = createTRPCRouter({
 
       return existingMeeting;
     }),
+
   getMany: protectedProcedure
     .input(
       z.object({
@@ -293,48 +279,13 @@ export const meetingsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { search, page, pageSize, status, agentId } = input;
-      const data = await db
-        .select({
-          ...getTableColumns(meetings),
-          agent: agents,
-          duration:
-            sql<number>`EXTRACT(EPOCH FROM ${meetings.endedAt} - ${meetings.startedAt})`.as(
-              "duration",
-            ),
-        })
-        .from(meetings)
-        .innerJoin(agents, eq(meetings.agentId, agents.id))
-        .where(
-          and(
-            eq(meetings.userId, ctx.auth.user.id),
-            search ? ilike(meetings.name, `%${search}%`) : undefined,
-            status ? eq(meetings.status, status) : undefined,
-            agentId ? eq(meetings.agentId, agentId) : undefined,
-          ),
-        )
-        .orderBy(desc(meetings.createdAt), desc(meetings.id))
-        .limit(pageSize)
-        .offset((page - 1) * pageSize);
-
-      const [total] = await db
-        .select({ count: count() })
-        .from(meetings)
-        .where(
-          and(
-            eq(meetings.userId, ctx.auth.user.id),
-            search ? ilike(meetings.name, `%${search}%`) : undefined,
-            status ? eq(meetings.status, status) : undefined,
-            agentId ? eq(meetings.agentId, agentId) : undefined,
-          ),
-        );
-
-      const totalPages = Math.ceil(total.count / pageSize);
-
-      return {
-        items: data,
-        total: total.count,
-        totalPages,
-      };
+      return await MeetingsService.getManyMeetings({
+        userId: ctx.auth.user.id,
+        page: input.page,
+        pageSize: input.pageSize,
+        search: input.search,
+        agentId: input.agentId,
+        status: input.status,
+      });
     }),
 });

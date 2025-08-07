@@ -21,14 +21,14 @@ export type GetManyAgentsResult = {
   totalPages: number;
 };
 
-export interface AgentWithMeetingCount {
+export type AgentWithMeetingCount = {
   meetingCount: number;
   id: string;
   userId: string;
   name: string;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type AgentInsert = z.infer<typeof agentInsertSchema>;
 
