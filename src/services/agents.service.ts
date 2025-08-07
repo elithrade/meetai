@@ -6,8 +6,8 @@ import {
   GetManyAgentsParams,
   GetManyAgentsResult,
 } from "./agents.types";
-import { agents } from "./schema";
-import { db } from ".";
+import { db } from "@/db";
+import { agents } from "@/db/schema";
 
 export class AgentsService {
   static async getManyAgents(

@@ -1,12 +1,12 @@
 import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
-import { db } from ".";
 import {
   GetManyMeetingsParams,
   GetManyMeetingsResult,
   MeetingInsert,
   MeetingUpdate,
 } from "./meetings.types";
-import { agents, meetings } from "./schema";
+import { agents, meetings } from "@/db/schema";
+import { db } from "@/db";
 
 export class MeetingsService {
   static async createMeeting(meetingData: MeetingInsert, userId: string) {

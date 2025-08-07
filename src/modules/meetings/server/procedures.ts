@@ -16,7 +16,7 @@ import { streamVideo } from "@/lib/stream-video";
 import { generateAvatarUri } from "@/lib/avatar";
 import JSONL from "jsonl-parse-stringify";
 import { streamChat } from "@/lib/stream-chat";
-import { MeetingsService } from "@/db/meetings.service";
+import { MeetingsService } from "@/services";
 
 export const meetingsRouter = createTRPCRouter({
   // TODO: Move this to stream service.
