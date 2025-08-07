@@ -4,7 +4,7 @@ import {
   GetManyMeetingsResult,
   MeetingInsert,
   MeetingUpdate,
-} from "./meetings.types";
+} from "./meetings-types";
 import { agents, meetings } from "@/db/schema";
 import { db } from "@/db";
 

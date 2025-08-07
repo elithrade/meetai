@@ -5,7 +5,7 @@ import {
   AgentWithMeetingCount,
   GetManyAgentsParams,
   GetManyAgentsResult,
-} from "./agents.types";
+} from "./agents-types";
 import { db } from "@/db";
 import { agents } from "@/db/schema";
 
