@@ -8,7 +8,7 @@ import {
   MIN_PAGE_SIZE,
 } from "@/constants";
 import { TRPCError } from "@trpc/server";
-import { AgentsService } from "@/db/agents.service";
+import { AgentsService } from "@/services";
 
 export const agentsRouter = createTRPCRouter({
   update: protectedProcedure
@@ -44,7 +44,7 @@ export const agentsRouter = createTRPCRouter({
   getOne: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      const existingAgent = await AgentsService.getAgentById(
+      const existingAgent = await AgentsService.getUserAgentById(
         input.id,
         ctx.auth.user.id,
       );
