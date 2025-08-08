@@ -33,7 +33,7 @@ export class StreamService {
       },
     ]);
 
-    const issuedAt = Math.floor(Date.now() / 1000) - 60; // 1 minute ago
+    const issuedAt = Math.floor(Date.now() / 1000) - 3 * 60; // 3 minute ago
     const expirationTime = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour from now
 
     const token = streamVideo.generateUserToken({
@@ -42,6 +42,7 @@ export class StreamService {
       exp: expirationTime,
     });
 
+    console.log("Generated Stream token:", token);
     return token;
   }
 
@@ -172,5 +173,67 @@ export class StreamService {
     });
 
     return transcriptWithSpeakers;
+  }
+
+  static async connectOpenAiToCall(
+    meetingId: string,
+    agentUserId: string,
+    instructions: string,
+  ) {
+    const call = streamVideo.video.call("default", meetingId);
+    const realtimeClient = await streamVideo.video.connectOpenAi({
+      call,
+      openAiApiKey: process.env.OPENAI_API_KEY!,
+      agentUserId,
+    });
+
+    realtimeClient.updateSession({
+      instructions,
+    });
+
+    return realtimeClient;
+  }
+
+  static async endCall(meetingId: string) {
+    const call = streamVideo.video.call("default", meetingId);
+    await call.end();
+  }
+
+  static async getChannelMessages(channelId: string, limit: number = 5) {
+    const channel = streamChat.channel("messaging", channelId);
+    await channel.watch();
+
+    return channel.state.messages
+      .slice(-limit)
+      .filter((m) => m.text && m.text.trim() !== "");
+  }
+
+  static async sendAgentMessage(
+    channelId: string,
+    agentId: string,
+    agentName: string,
+    message: string,
+  ) {
+    const avatarUrl = generateAvatarUri({
+      seed: agentName,
+      variant: "bottts-neutral",
+    });
+
+    await streamChat.upsertUser({
+      id: agentId,
+      name: agentName,
+      image: avatarUrl,
+    });
+
+    const channel = streamChat.channel("messaging", channelId);
+
+    await channel.sendMessage({
+      text: message,
+      user: {
+        id: agentId,
+        name: agentName,
+        image: avatarUrl,
+      },
+    });
   }
 }

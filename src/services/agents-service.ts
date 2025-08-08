@@ -46,7 +46,7 @@ export class AgentsService {
     };
   }
 
-  static async getAgentById(
+  static async getUserAgentById(
     agentId: string,
     userId: string,
   ): Promise<AgentWithMeetingCount | undefined> {
@@ -60,6 +60,15 @@ export class AgentsService {
       .where(and(eq(agents.id, agentId), eq(agents.userId, userId)));
 
     return existingAgent;
+  }
+
+  static async getAgentById(agentId: string) {
+    const [agent] = await db
+      .select()
+      .from(agents)
+      .where(eq(agents.id, agentId));
+
+    return agent;
   }
 
   static async updateAgent(agentData: AgentUpdate, userId: string) {

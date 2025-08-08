@@ -7,6 +7,7 @@ import {
 } from "./meetings-types";
 import { agents, meetings } from "@/db/schema";
 import { db } from "@/db";
+import { MeetingStatus } from "@/modules/meetings/types";
 
 export class MeetingsService {
   static async createMeeting(meetingData: MeetingInsert, userId: string) {
@@ -97,5 +98,73 @@ export class MeetingsService {
       total: total.count,
       totalPages,
     };
+  }
+
+  static async getMeetingByIdAndStatus(
+    meetingId: string,
+    status: MeetingStatus,
+  ) {
+    const [meeting] = await db
+      .select()
+      .from(meetings)
+      .where(and(eq(meetings.id, meetingId), eq(meetings.status, status)));
+
+    return meeting;
+  }
+
+  // TODO: Change params to use UpdateMeetingStatus
+  static async updateMeetingStatus(
+    meetingId: string,
+    status: MeetingStatus,
+    startedAt?: Date,
+    endedAt?: Date,
+  ) {
+    type UpdateData = {
+      startedAt?: Date;
+      endedAt?: Date;
+      status: MeetingStatus;
+    };
+
+    const updateData: UpdateData = { status };
+
+    if (startedAt) {
+      updateData.startedAt = startedAt;
+    }
+    if (endedAt) {
+      updateData.endedAt = endedAt;
+    }
+
+    const whereClause = and(eq(meetings.id, meetingId));
+
+    const [updatedMeeting] = await db
+      .update(meetings)
+      .set(updateData)
+      .where(whereClause)
+      .returning();
+
+    return updatedMeeting;
+  }
+
+  static async updateMeetingTranscript(
+    meetingId: string,
+    transcriptUrl: string,
+  ) {
+    const [updatedMeeting] = await db
+      .update(meetings)
+      .set({ transcriptUrl })
+      .where(eq(meetings.id, meetingId))
+      .returning();
+
+    return updatedMeeting;
+  }
+
+  static async updateMeetingRecording(meetingId: string, recordingUrl: string) {
+    const [updatedMeeting] = await db
+      .update(meetings)
+      .set({ recordingUrl })
+      .where(eq(meetings.id, meetingId))
+      .returning();
+
+    return updatedMeeting;
   }
 }
