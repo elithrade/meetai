@@ -12,7 +12,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { meetingInsertSchema, meetingUpdateSchema } from "../schema";
 import { MeetingStatus } from "../types";
-import { MeetingsService, StreamService } from "@/services";
+import { AgentsService, MeetingsService, StreamService } from "@/services";
 
 export const meetingsRouter = createTRPCRouter({
   generateChatToken: protectedProcedure.mutation(async ({ ctx }) => {
@@ -101,11 +101,9 @@ export const meetingsRouter = createTRPCRouter({
         meetingName: createdMeeting.name,
       });
 
-      // TODO: Replace with getAgentById from agents service.
-      const [existingAgent] = await db
-        .select()
-        .from(agents)
-        .where(eq(agents.id, input.agentId));
+      const existingAgent = await AgentsService.getAgentById(
+        createdMeeting.agentId,
+      );
 
       if (!existingAgent) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Agent not found" });

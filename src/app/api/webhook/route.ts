@@ -235,8 +235,6 @@ async function handleMessageNew(event: MessageNewEvent) {
       );
     }
 
-    console.log(JSON.stringify(aiResponse, null, 2));
-
     await StreamService.sendAgentMessage(
       channelId,
       existingAgent.id,
