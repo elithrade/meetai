@@ -42,7 +42,6 @@ export class StreamService {
       exp: expirationTime,
     });
 
-    console.log("Generated Stream token:", token);
     return token;
   }
 
