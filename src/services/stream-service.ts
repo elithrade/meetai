@@ -115,7 +115,7 @@ export class StreamService {
     return this.enrichTranscriptWithNames(transcript);
   }
 
-  private static async getSpeakersByIds(speakerIds: string[]) {
+  static async getSpeakersByIds(speakerIds: string[]) {
     if (speakerIds.length === 0) {
       return [];
     }
@@ -141,7 +141,7 @@ export class StreamService {
     return [...userSpeakers, ...agentSpeakers];
   }
 
-  private static async enrichTranscriptWithNames(
+  static async enrichTranscriptWithNames(
     transcript: StreamTranscriptItem[],
   ): Promise<Array<StreamTranscriptItem & { user: { name: string } }>> {
     if (transcript.length === 0) {
@@ -172,7 +172,7 @@ export class StreamService {
     });
   }
 
-  private static async enrichTranscriptWithImages(
+  static async enrichTranscriptWithImages(
     transcript: StreamTranscriptItem[],
   ): Promise<
     Array<StreamTranscriptItem & { user: { name: string; image: string } }>
