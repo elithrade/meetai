@@ -58,6 +58,7 @@ describe("StreamService", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   describe("generateChatToken", () => {
@@ -360,7 +361,7 @@ describe("StreamService", () => {
       expect(result).toEqual([]);
     });
 
-    it.skip("should enrich transcript items with speaker names and images", async () => {
+    it("should enrich transcript items with speaker names and images", async () => {
       const mockTranscript = [
         {
           speaker_id: "user-1",
