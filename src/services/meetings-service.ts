@@ -167,4 +167,17 @@ export class MeetingsService {
 
     return updatedMeeting;
   }
+
+  static async completeMeetingWithSummary(meetingId: string, summary: string) {
+    const [updatedMeeting] = await db
+      .update(meetings)
+      .set({
+        summary,
+        status: MeetingStatus.Completed,
+      })
+      .where(eq(meetings.id, meetingId))
+      .returning();
+
+    return updatedMeeting;
+  }
 }

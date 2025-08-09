@@ -106,11 +106,19 @@ export class StreamService {
         return [];
       });
 
-    if (transcript.length === 0) {
+    return this.enrichTranscriptWithImages(transcript);
+  }
+
+  static async getTranscriptWithSpeakerNames(
+    transcript: StreamTranscriptItem[],
+  ): Promise<Array<StreamTranscriptItem & { user: { name: string } }>> {
+    return this.enrichTranscriptWithNames(transcript);
+  }
+
+  private static async getSpeakersByIds(speakerIds: string[]) {
+    if (speakerIds.length === 0) {
       return [];
     }
-
-    const speakerIds = [...new Set(transcript.map((item) => item.speaker_id))];
 
     // Get user speakers
     const userSpeakers = await db
@@ -118,12 +126,7 @@ export class StreamService {
       .from(user)
       .where(inArray(user.id, speakerIds))
       .then((users) =>
-        users.map((user) => ({
-          ...user,
-          image:
-            user.image ??
-            generateAvatarUri({ seed: user.name, variant: "initials" }),
-        })),
+        users.map((user) => ({ ...user, type: "user" as const })),
       );
 
     // Get agent speakers
@@ -132,22 +135,57 @@ export class StreamService {
       .from(agents)
       .where(inArray(agents.id, speakerIds))
       .then((agents) =>
-        agents.map((agent) => ({
-          ...agent,
-          image: generateAvatarUri({
-            seed: agent.name,
-            variant: "bottts-neutral",
-          }),
-        })),
+        agents.map((agent) => ({ ...agent, type: "agent" as const })),
       );
 
-    const speakers = [...userSpeakers, ...agentSpeakers];
+    return [...userSpeakers, ...agentSpeakers];
+  }
 
-    // Map transcript items with speaker information
-    const transcriptWithSpeakers = transcript.map((item) => {
-      const speaker = speakers.find(
-        (speaker) => speaker.id === item.speaker_id,
-      );
+  private static async enrichTranscriptWithNames(
+    transcript: StreamTranscriptItem[],
+  ): Promise<Array<StreamTranscriptItem & { user: { name: string } }>> {
+    if (transcript.length === 0) {
+      return [];
+    }
+
+    const speakerIds = [...new Set(transcript.map((item) => item.speaker_id))];
+    const speakers = await this.getSpeakersByIds(speakerIds);
+
+    return transcript.map((item) => {
+      const speaker = speakers.find((s) => s.id === item.speaker_id);
+
+      if (!speaker) {
+        return {
+          ...item,
+          user: {
+            name: "Unknown",
+          },
+        };
+      }
+
+      return {
+        ...item,
+        user: {
+          name: speaker.name,
+        },
+      };
+    });
+  }
+
+  private static async enrichTranscriptWithImages(
+    transcript: StreamTranscriptItem[],
+  ): Promise<
+    Array<StreamTranscriptItem & { user: { name: string; image: string } }>
+  > {
+    if (transcript.length === 0) {
+      return [];
+    }
+
+    const speakerIds = [...new Set(transcript.map((item) => item.speaker_id))];
+    const speakers = await this.getSpeakersByIds(speakerIds);
+
+    return transcript.map((item) => {
+      const speaker = speakers.find((s) => s.id === item.speaker_id);
 
       if (!speaker) {
         return {
@@ -162,16 +200,23 @@ export class StreamService {
         };
       }
 
+      const image =
+        speaker.type === "user"
+          ? (speaker.image ??
+            generateAvatarUri({ seed: speaker.name, variant: "initials" }))
+          : generateAvatarUri({
+              seed: speaker.name,
+              variant: "bottts-neutral",
+            });
+
       return {
         ...item,
         user: {
           name: speaker.name,
-          image: speaker.image,
+          image,
         },
       };
     });
-
-    return transcriptWithSpeakers;
   }
 
   static async connectOpenAiToCall(
@@ -234,5 +279,12 @@ export class StreamService {
         image: avatarUrl,
       },
     });
+  }
+
+  static async fetchAndParseTranscript(
+    transcriptUrl: string,
+  ): Promise<StreamTranscriptItem[]> {
+    const response = await fetch(transcriptUrl).then((res) => res.text());
+    return JSONL.parse<StreamTranscriptItem>(response);
   }
 }
