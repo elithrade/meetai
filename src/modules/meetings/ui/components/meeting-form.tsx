@@ -23,6 +23,7 @@ import { useState } from "react";
 import { CommandSelect } from "@/components/command-select";
 import { GeneratedAvatar } from "@/components/generated-avatar";
 import { NewAgentDialog } from "@/modules/agents/ui/components/new-agent-dialog";
+import { useRouter } from "next/navigation";
 
 type MeetingFormProps = {
   onSuccess?: (id?: string) => void;
@@ -37,6 +38,7 @@ export const MeetingForm = ({
 }: MeetingFormProps) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [agentSearch, setAgentSearch] = useState("");
   const [openNewAgentDialog, setOpenNewAgentDialog] = useState(false);
@@ -54,10 +56,16 @@ export const MeetingForm = ({
         await queryClient.invalidateQueries(
           trpc.meetings.getMany.queryOptions({}),
         );
+        await queryClient.invalidateQueries(
+          trpc.premium.getFreeUsage.queryOptions(),
+        );
         onSuccess?.(data.id);
       },
       onError: (error) => {
         toast.error(error.message);
+        if (error.data?.code === "FORBIDDEN") {
+          router.push("/upgrade");
+        }
       },
     }),
   );
