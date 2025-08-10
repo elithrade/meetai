@@ -51,6 +51,9 @@ export const AgentForm = ({
       },
       onError: (error) => {
         toast.error(error.message);
+        if (error.data?.code === "FORBIDDEN") {
+          router.push("/upgrade");
+        }
       },
     }),
   );
@@ -70,10 +73,7 @@ export const AgentForm = ({
         onSuccess?.();
       },
       onError: (error) => {
-        toast.error(error.message);
-        if (error.data?.code === "FORBIDDEN") {
-          router.push("/upgrade");
-        }
+        toast.error(error.data?.code);
       },
     }),
   );
