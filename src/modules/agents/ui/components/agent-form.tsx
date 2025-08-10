@@ -42,7 +42,9 @@ export const AgentForm = ({
         await queryClient.invalidateQueries(
           trpc.agents.getMany.queryOptions({}),
         );
-        // Close it
+        await queryClient.invalidateQueries(
+          trpc.premium.getFreeUsage.queryOptions(),
+        );
         onSuccess?.();
       },
       onError: (error) => {
@@ -63,8 +65,6 @@ export const AgentForm = ({
             trpc.agents.getOne.queryOptions({ id: initialValues.id }),
           );
         }
-        // TODO: Invalidate free tier usage.
-        // Close it
         onSuccess?.();
       },
       onError: (error) => {
