@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { AIService } from "./ai-service";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions/index.mjs";
 import { LocalMessage } from "stream-chat";
