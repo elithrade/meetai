@@ -30,7 +30,7 @@ const Page = async () => {
         fallback={
           <LoadingState
             title="Loading"
-            description="The may take a few seconds"
+            description="This may take a few seconds"
           />
         }
       >

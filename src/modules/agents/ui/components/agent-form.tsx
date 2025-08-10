@@ -73,7 +73,7 @@ export const AgentForm = ({
         onSuccess?.();
       },
       onError: (error) => {
-        toast.error(error.data?.code);
+        toast.error(error.message);
       },
     }),
   );
