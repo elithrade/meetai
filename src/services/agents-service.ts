@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike } from "drizzle-orm";
 import {
   AgentInsert,
   AgentUpdate,
@@ -7,7 +7,7 @@ import {
   GetManyAgentsResult,
 } from "./agents-types";
 import { db } from "@/db";
-import { agents } from "@/db/schema";
+import { agents, meetings } from "@/db/schema";
 
 export class AgentsService {
   static async getManyAgents(
@@ -22,8 +22,7 @@ export class AgentsService {
 
     const data = await db
       .select({
-        // TODO: Implement actual meeting count logic.
-        meetingCount: sql<number>`6`,
+        meetingCount: db.$count(meetings, eq(agents.id, meetings.agentId)),
         ...getTableColumns(agents),
       })
       .from(agents)
@@ -52,8 +51,7 @@ export class AgentsService {
   ): Promise<AgentWithMeetingCount | undefined> {
     const [existingAgent] = await db
       .select({
-        // TODO: Implement the actual meeting count logic.
-        meetingCount: sql<number>`5`,
+        meetingCount: db.$count(meetings, eq(agents.id, meetings.agentId)),
         ...getTableColumns(agents),
       })
       .from(agents)
