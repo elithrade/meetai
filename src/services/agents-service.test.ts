@@ -8,6 +8,7 @@ vi.mock("@/db", () => ({
     update: vi.fn(),
     delete: vi.fn(),
     insert: vi.fn(),
+    $count: vi.fn(),
   },
 }));
 
@@ -17,6 +18,16 @@ vi.mock("@/db/schema", () => ({
     userId: "user_id",
     createdAt: "created_at",
     name: "name",
+  },
+  meetings: {
+    id: "id",
+    userId: "user_id",
+    createdAt: "created_at",
+    name: "name",
+    status: "status",
+    agentId: "agent_id",
+    startedAt: "started_at",
+    endedAt: "ended_at",
   },
 }));
 
@@ -49,6 +60,8 @@ describe("AgentsService", () => {
             where: () => mockCount,
           }),
         });
+
+      (db.$count as Mock).mockReturnValueOnce(mockCount[0].count);
 
       const result = await AgentsService.getManyAgents({
         userId: "u1",
